@@ -1,0 +1,8 @@
+#This test file contain test cases in lines.
+#The part before # is the input.
+#The part after # is the expected output.
+### We don't some of commands here since they need to build as a subtree.
+REM COMMENT "QuemAudioCopy v1.6"#REM COMMENT "QuemAudioCopy v1.6"
+TITLE "Por Quem os Sinos Dobram"#TITLE "Por Quem os Sinos Dobram"
+TITLE S.O.S.#TITLE S.O.S.
+INDEX 01 02:10:34#INDEX 01 02:10:34
