@@ -40,6 +40,7 @@ const (
 	itemPerformer
 	itemIndex
 	itemTrack
+
 	//keywords go above,The last argument of file command
 	itemFileType
 	itemBinary
@@ -49,32 +50,9 @@ const (
 	itemMp3
 )
 
-var itemStringStore = map[itemType]string{
-	itemError:   "Error",
-	itemEOF:     "EOF",
-	itemSpace:   " ",
-	itemColon:   ":",
-	itemNumber:  "NUMBER",
-	itemText:    "TEXT",
-	itemNewline: "\n",
-
-	itemKeyword:   "KEYWORD",
-	itemFile:      "FILE",
-	itemTitle:     "TITLE",
-	itemRem:       "REM",
-	itemPerformer: "PERFORMER",
-	itemIndex:     "INDEX",
-	itemTrack:     "TRACK",
-
-	itemBinary:   "BINARY",
-	itemMotorola: "MOTOROLA",
-	itemAiff:     "AIFF",
-	itemWave:     "WAVE",
-	itemMp3:      "MP3",
-}
-
 var key = map[string]itemType{
-	"FILE":      itemFile,
+	"FILE": itemFile,
+
 	"TITLE":     itemTitle,
 	"REM":       itemRem,
 	"PERFORMER": itemPerformer,
@@ -87,12 +65,18 @@ var key = map[string]itemType{
 	"MP3":       itemMp3,
 }
 
-func (i itemType) String() string {
-	v, ok := itemStringStore[i]
-	if !ok {
-		return "not implemented"
+func (i item) String() string {
+
+	switch {
+	case i.typ == itemEOF:
+		return "EOF"
+	case i.typ == itemError:
+		return i.val
+	case i.typ > itemKeyword:
+		return i.val
 	}
-	return v
+	return fmt.Sprintf("%q", i.val)
+
 }
 
 // stateFn represents the state of the lexer as a function that returns the
@@ -122,6 +106,7 @@ func (l *lexer) next() rune {
 	l.pos += l.width
 	if r == '\n' {
 		l.line++
+
 	}
 	return r
 }
@@ -212,6 +197,8 @@ func lexText(l *lexer) stateFn {
 		return lexNumber
 	case isAlphaNumeric(r):
 		return lexIdentifier
+	default:
+		return l.errorf("bad syntax: %q", l.input[l.start:l.pos])
 	}
 
 	return lexText

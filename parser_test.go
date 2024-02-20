@@ -89,9 +89,7 @@ func TestParseCueFiles(t *testing.T) {
 			for _, item := range parseResult.Traverse()[1:] {
 				switch v := item.(type) {
 				case node:
-					output.WriteString(v.Type.String())
-					output.WriteRune(' ')
-					output.WriteString(v.Value)
+					output.WriteString(v.String())
 					output.WriteRune('\n')
 				default:
 					t.Fatal("unexpected type in parsed result")

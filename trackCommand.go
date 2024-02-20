@@ -29,17 +29,17 @@ func (p *Parser) matchTrack(ft *tree.Tree) (err error) {
 	}
 
 	item = p.nextNonSpace()
-	switch item.typ {
-	case itemText:
+	if item.typ == itemText {
 		if s.Len() > 0 {
 			s.WriteRune(' ')
 		}
 		s.WriteString(item.val)
-	default:
-		return fmt.Errorf("[matchTrack] expected a simple text at %d %d", p.lexer.line, p.lexer.pos)
+
+	} else {
+		return fmt.Errorf("[matchTrack] expected text at %d %d", p.lexer.line, p.lexer.pos)
 	}
 
-	n := node{Type: itemTrack, Value: s.String()}
+	n := node{Type: "TRACK", Value: s.String()}
 	tt := ft.AddTree(n)
 	//parse children of track
 
@@ -54,28 +54,28 @@ func (p *Parser) matchTrack(ft *tree.Tree) (err error) {
 			if err != nil {
 				return err
 			}
-			n := node{Type: item.typ, Value: s.Value}
+			n := node{Type: item.String(), Value: s.Value}
 			tt.AddTree(n)
 		case itemIndex:
 			s, err := p.matchIndex()
 			if err != nil {
 				return err
 			}
-			n := node{Type: item.typ, Value: s.Value}
+			n := node{Type: item.String(), Value: s.Value}
 			tt.AddTree(n)
 		case itemPerformer:
 			s, err := p.matchTitle()
 			if err != nil {
 				return err
 			}
-			n := node{Type: item.typ, Value: s.Value}
+			n := node{Type: item.String(), Value: s.Value}
 			tt.AddTree(n)
 		case itemRem:
 			s, err := p.matchRem()
 			if err != nil {
 				return err
 			}
-			n := node{Type: item.typ, Value: s.Value}
+			n := node{Type: item.String(), Value: s.Value}
 			tt.AddTree(n)
 		case itemTrack:
 			p.backup()
@@ -83,9 +83,9 @@ func (p *Parser) matchTrack(ft *tree.Tree) (err error) {
 			if err != nil {
 				return err
 			}
+		case itemError:
+			return fmt.Errorf("reading error %s at pos %d of line %d", item, item.pos, item.line)
 
-		default:
-			continue
 		}
 	}
 

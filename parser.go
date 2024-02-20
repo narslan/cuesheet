@@ -6,7 +6,6 @@ package cuesheet
 
 import (
 	"fmt"
-
 	"github.com/narslan/tree"
 )
 
@@ -18,7 +17,7 @@ type Parser struct {
 	peekCount int
 }
 type node struct {
-	Type  itemType
+	Type  string
 	Value string
 }
 
@@ -46,7 +45,7 @@ func (p *Parser) Start() (*tree.Tree, error) {
 			if err != nil {
 				return nil, err
 			}
-			n := node{Type: item.typ, Value: s.Value}
+			n := node{Type: item.String(), Value: s.Value}
 			p.tree.AddTree(n)
 
 		case itemTitle:
@@ -54,27 +53,30 @@ func (p *Parser) Start() (*tree.Tree, error) {
 			if err != nil {
 				return nil, err
 			}
-			n := node{Type: item.typ, Value: s.Value}
+			n := node{Type: item.String(), Value: s.Value}
 			p.tree.AddTree(n)
 		case itemIndex:
 			s, err := p.matchIndex()
 			if err != nil {
 				return nil, err
 			}
-			n := node{Type: item.typ, Value: s.Value}
+			n := node{Type: item.String(), Value: s.Value}
 			p.tree.AddTree(n)
 		case itemFile:
 			s, err := p.matchFile()
 			if err != nil {
 				return nil, err
 			}
-			n := node{Type: item.typ, Value: s.Value}
+			n := node{Type: item.String(), Value: s.Value}
 			ft := p.tree.AddTree(n)
 
 			err = p.matchTrack(ft)
 			if err != nil {
 				return nil, err
 			}
+
+		case itemError:
+			return nil, fmt.Errorf("reading error %s at pos %d of line %d", item, item.pos, item.line)
 
 		}
 
