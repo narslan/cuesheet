@@ -72,17 +72,20 @@ func (p *parser) matchRem() (c remCmd, err error) {
 }
 
 type indexCmd struct {
-	TimeIndex string
+	ID     string
+	Min    string
+	Sec    string
+	Frames string
 }
 
 func (c indexCmd) String() string {
-	return c.TimeIndex
+	return fmt.Sprintf("%s %s %s %s", c.ID, c.Min, c.Sec, c.Frames)
 }
 
 // matchIndex captures the arguments of INDEX command.
 func (p *parser) matchIndex() (c indexCmd, err error) {
 
-	var s strings.Builder
+	idx := indexCmd{}
 
 	item := p.nextNonSpace()
 	if item.typ == itemEOF || item.typ == itemNewline {
@@ -91,29 +94,35 @@ func (p *parser) matchIndex() (c indexCmd, err error) {
 
 	if item.typ == itemNumber {
 		//We want to put a space between items.
-		if s.Len() > 0 {
-			s.WriteRune(' ')
-		}
-		s.WriteString(item.val)
+		idx.ID = item.val
+
 	} else {
 		return c, fmt.Errorf("expected text at %d %d but found %q ", p.lexer.line, p.lexer.pos, item.val)
 	}
-	s.WriteRune(' ')
+
 	//parsing mm:ss:ff part of the INDEX command.
 	for i := 0; i < 5; i++ {
 		item = p.nextNonSpace()
 
 		switch item.typ {
-		case itemNumber, itemColon:
-			s.WriteString(item.val)
+		case itemNumber:
+			if i == 0 {
+				idx.Min = item.val
+			}
+			if i == 2 {
+				idx.Sec = item.val
+			}
+			if i == 4 {
+				idx.Frames = item.val
+			}
+		case itemColon:
 		default:
 			return c, fmt.Errorf("expected text at %d %d but found %q", p.lexer.line, p.lexer.pos, item.val)
 		}
 
 	}
 
-	c = indexCmd{TimeIndex: s.String()}
-	return c, nil
+	return idx, nil
 }
 
 type fileCmd struct {

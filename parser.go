@@ -10,6 +10,22 @@ import (
 	"github.com/narslan/tree"
 )
 
+type Index struct {
+	Minutes int
+	Seconds int
+	Frames  int
+}
+
+type Track struct {
+	ID      int
+	Indices []*Index
+}
+
+type File struct {
+	Path   string
+	Tracks []*Track
+}
+
 // parser
 type parser struct {
 	lexer     *lexer
@@ -34,8 +50,9 @@ func newParser(input string) *parser {
 	return p
 }
 
-func (p *parser) Start() (*tree.Tree, error) {
+func (p *parser) Start() (*tree.Tree, []*File, error) {
 
+	f := make([]*File, 0)
 	tree := tree.New("root")
 	p.tree = tree
 	for {
@@ -47,7 +64,7 @@ func (p *parser) Start() (*tree.Tree, error) {
 		case itemRem:
 			s, err := p.matchRem()
 			if err != nil {
-				return nil, err
+				return nil, f, err
 			}
 			n := node{Type: item, Value: s}
 			p.tree.AddTree(n)
@@ -55,37 +72,38 @@ func (p *parser) Start() (*tree.Tree, error) {
 		case itemTitle:
 			s, err := p.matchTitle()
 			if err != nil {
-				return nil, err
+				return nil, f, err
 			}
 			n := node{Type: item, Value: s}
 			p.tree.AddTree(n)
 		case itemIndex:
 			s, err := p.matchIndex()
 			if err != nil {
-				return nil, err
+				return nil, f, err
 			}
 			n := node{Type: item, Value: s}
 			p.tree.AddTree(n)
 		case itemFile:
 			s, err := p.matchFile()
 			if err != nil {
-				return nil, err
+				return nil, f, err
 			}
 			n := node{Type: item, Value: s}
 			ft := p.tree.AddTree(n)
-
-			err = p.matchTrack(ft)
+			file := &File{Path: s.Path, Tracks: make([]*Track, 0)}
+			err = p.matchTrack(ft, file)
 			if err != nil {
-				return nil, err
+				return nil, f, err
 			}
+			f = append(f, file)
 
 		case itemError:
-			return nil, fmt.Errorf("%s on line %d", item, item.line)
+			return nil, f, fmt.Errorf("%s on line %d", item, item.line)
 
 		}
 
 	}
-	return tree, nil
+	return tree, f, nil
 }
 func (p *parser) next() item {
 	if p.peekCount > 0 {

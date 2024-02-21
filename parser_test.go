@@ -116,7 +116,7 @@ func parse_helper(tb testing.TB, input string) *tree.Tree {
 	tb.Helper()
 
 	parse := newParser(input)
-	tree, err := parse.Start()
+	tree, _, err := parse.Start()
 	if err != nil {
 		tb.Fatal(err)
 	}

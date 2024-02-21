@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -45,8 +46,14 @@ func main() {
 		log.Fatal(err)
 	}
 
-	for _, v := range c.Files() {
-		log.Println(v)
+	for i, v := range c.Files() {
+		fmt.Printf("#[%d]\n %s\n", i+1, v.Path)
+		for j, track := range v.Tracks {
+			fmt.Printf("  [%d] %d\n", j+1, track.ID)
+			for k, id := range track.Indices {
+				fmt.Printf("  [%d] %d %d %d", k+1, id.Minutes, id.Seconds, id.Frames)
+			}
+		}
 	}
 
 }
