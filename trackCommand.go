@@ -85,7 +85,7 @@ OUT:
 				return err
 			}
 		case itemFile:
-
+			p.backup()
 			break OUT
 
 		case itemError:

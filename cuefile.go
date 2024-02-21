@@ -1,8 +1,6 @@
 package cuesheet
 
 import (
-	"fmt"
-
 	"github.com/narslan/tree"
 )
 
@@ -37,6 +35,5 @@ func (c *Cuefile) Files() []string {
 		}
 	}
 
-	fmt.Println(c.t)
 	return result
 }
