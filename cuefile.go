@@ -25,13 +25,10 @@ func (c *Cuefile) Files() []string {
 	for _, item := range c.t.Traverse() {
 		switch v := item.(type) {
 		case node:
-			switch v.Type.typ {
-			case itemFile:
-				if v.Type.typ == itemFile {
-					result = append(result, v.Value.String())
-				}
+			switch f := v.Value.(type) {
+			case fileCmd:
+				result = append(result, f.Path)
 			}
-
 		}
 	}
 
