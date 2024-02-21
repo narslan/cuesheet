@@ -44,6 +44,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	for _, v := range c.Files() {
 		log.Println(v)
 	}
