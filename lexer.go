@@ -15,10 +15,11 @@ type itemType int
 
 // Item represents a token or text string returned from the scanner.
 type item struct {
-	typ  itemType // The type of this Item.
-	pos  int      // The starting position, in bytes, of this Item in the input string.
-	val  string   // The value of this Item.
-	line int      // The line number at the start of this Item.
+	typ itemType // The type of this Item.
+	pos int      // The starting position, in bytes, of this Item in the input string.
+	val string   // The value of this Item.
+	// linePos int      //The position relative to the start of the line.
+	line int // The line number at the start of this Item.
 }
 
 const eof = -1
@@ -106,7 +107,6 @@ func (l *lexer) next() rune {
 	l.pos += l.width
 	if r == '\n' {
 		l.line++
-
 	}
 	return r
 }

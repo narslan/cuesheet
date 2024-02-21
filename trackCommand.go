@@ -89,7 +89,7 @@ OUT:
 			break OUT
 
 		case itemError:
-			return fmt.Errorf("reading error %s at pos %d of line %d", item, item.pos, item.line)
+			return fmt.Errorf("%s on line %d", item, item.line)
 
 		}
 	}

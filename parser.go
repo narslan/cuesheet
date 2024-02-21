@@ -80,7 +80,7 @@ func (p *parser) Start() (*tree.Tree, error) {
 			}
 
 		case itemError:
-			return nil, fmt.Errorf("reading error %s at pos %d of line %d", item, item.pos, item.line)
+			return nil, fmt.Errorf("%s on line %d", item, item.line)
 
 		}
 
