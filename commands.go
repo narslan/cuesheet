@@ -9,10 +9,12 @@ type titleCmd struct {
 	Value string
 }
 
-// matchTitle captures the carguments of TITLE command.
-func (p *Parser) matchTitle() (c titleCmd, err error) {
+func (c titleCmd) String() string {
+	return c.Value
+}
 
-	var s strings.Builder
+// matchTitle captures the carguments of TITLE command.
+func (p *parser) matchTitle() (c titleCmd, err error) {
 
 	item := p.lexer.nextItem()
 	if item.typ == itemEOF || item.typ == itemNewline {
@@ -21,26 +23,34 @@ func (p *Parser) matchTitle() (c titleCmd, err error) {
 
 	if item.typ == itemText || item.typ == itemNumber {
 		//Put a space between items.
-		if s.Len() > 0 {
-			s.WriteRune(' ')
-		}
-		s.WriteString(item.val)
+		return titleCmd{Value: item.val}, nil
 	} else {
 		return c, fmt.Errorf("expected text at %d %d", p.lexer.line, p.lexer.pos)
 	}
 
-	rs := titleCmd{Value: s.String()}
-	return rs, nil
 }
 
 type remCmd struct {
-	Value string
+	Values []string
+}
+
+func (c remCmd) String() string {
+	var s strings.Builder
+
+	for i, v := range c.Values {
+		s.WriteString(v)
+		if i < len(v)-1 {
+			s.WriteRune(' ')
+		}
+	}
+
+	return s.String()
 }
 
 // matchRem captures the comment of REM command.
-func (p *Parser) matchRem() (c remCmd, err error) {
+func (p *parser) matchRem() (c remCmd, err error) {
 
-	var s strings.Builder
+	c.Values = make([]string, 0)
 
 	for {
 		item := p.lexer.nextItem()
@@ -49,32 +59,28 @@ func (p *Parser) matchRem() (c remCmd, err error) {
 		}
 
 		if item.typ == itemText {
-
-			if s.Len() > 0 {
-				s.WriteRune(' ')
-			}
-			s.WriteString(item.val)
+			c.Values = append(c.Values, item.val)
 		}
 
 		if item.typ == itemNumber {
-
-			if s.Len() > 0 {
-				s.WriteRune(' ')
-			}
-			s.WriteString(item.val)
+			c.Values = append(c.Values, item.val)
 		}
 
 	}
-	c = remCmd{Value: s.String()}
+
 	return c, nil
 }
 
 type indexCmd struct {
-	Value string
+	TimeIndex string
+}
+
+func (c indexCmd) String() string {
+	return c.TimeIndex
 }
 
 // matchIndex captures the arguments of INDEX command.
-func (p *Parser) matchIndex() (c indexCmd, err error) {
+func (p *parser) matchIndex() (c indexCmd, err error) {
 
 	var s strings.Builder
 
@@ -106,18 +112,21 @@ func (p *Parser) matchIndex() (c indexCmd, err error) {
 
 	}
 
-	c = indexCmd{Value: s.String()}
+	c = indexCmd{TimeIndex: s.String()}
 	return c, nil
 }
 
 type fileCmd struct {
-	Value string
+	Path   string
+	Format string
+}
+
+func (f fileCmd) String() string {
+	return fmt.Sprintf("%s %s", f.Path, f.Format)
 }
 
 // matchIndex captures the arguments of FILE command.
-func (p *Parser) matchFile() (c fileCmd, err error) {
-
-	var s strings.Builder
+func (p *parser) matchFile() (c fileCmd, err error) {
 
 	item := p.nextNonSpace()
 	if item.typ == itemEOF {
@@ -125,11 +134,7 @@ func (p *Parser) matchFile() (c fileCmd, err error) {
 	}
 
 	if item.typ == itemText {
-		if s.Len() > 0 {
-			s.WriteRune(' ')
-		}
-		s.WriteString(item.val)
-
+		c.Path = item.val
 	} else {
 		return c, fmt.Errorf("expected text at %d %d", p.lexer.line, p.lexer.pos)
 	}
@@ -139,15 +144,11 @@ func (p *Parser) matchFile() (c fileCmd, err error) {
 	switch item.typ {
 
 	case itemBinary, itemMotorola, itemAiff, itemWave, itemMp3:
-		if s.Len() > 0 {
-			s.WriteRune(' ')
-		}
-		s.WriteString(item.val)
+		c.Format = item.val
 	default:
 		return c, fmt.Errorf("expected a file type at %d %d", p.lexer.line, p.lexer.pos)
 
 	}
 
-	c = fileCmd{Value: s.String()}
 	return c, nil
 }

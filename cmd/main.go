@@ -2,10 +2,11 @@ package main
 
 import (
 	"bufio"
-	"github.com/narslan/cuesheet"
 	"io"
 	"log"
 	"os"
+
+	"github.com/narslan/cuesheet"
 )
 
 // main ...
@@ -38,11 +39,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	parse := cuesheet.NewParser(string(source))
-	tree, err := parse.Start()
+	c, err := cuesheet.NewCueFile(string(source))
+
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println(tree)
+	log.Println(c.Files())
 
 }

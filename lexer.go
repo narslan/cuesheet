@@ -195,40 +195,36 @@ func lexText(l *lexer) stateFn {
 		return lexQuote
 	case unicode.IsNumber(r):
 		return lexNumber
-	case isAlphaNumeric(r):
+	case isIdentifierChar(r):
 		return lexIdentifier
 	default:
 		return l.errorf("bad syntax: %q", l.input[l.start:l.pos])
 	}
 
-	return lexText
 }
 
 func lexNumber(l *lexer) stateFn {
-	if !l.scanNumber() {
-		return l.errorf("bad number syntax: %q", l.input[l.start:l.pos])
-	}
-	return l.emit(itemNumber)
-}
 
-func (l *lexer) scanNumber() bool {
-
-	digits := "0123456789"
-	l.acceptRun(digits)
-	// Next thing mustn't be alphanumeric.
-	if isAlphaNumeric(l.peek()) {
-		l.next()
-		return false
+	f := func(r rune) bool {
+		return unicode.IsLetter(r)
 	}
 
-	return true
-}
+	for {
+		switch r := l.next(); {
+		case isIdentifierChar(r):
+			// absorb.
+		default:
+			l.backup()
+			word := strings.ToUpper(l.input[l.start:l.pos]) //Commands are case insensitive.
+			if strings.ContainsFunc(word, f) {
+				return l.emit(itemText)
+			} else {
+				return l.emit(itemNumber)
+			}
 
-// acceptRun consumes a run of runes from the valid set.
-func (l *lexer) acceptRun(valid string) {
-	for strings.ContainsRune(valid, l.next()) {
+		}
 	}
-	l.backup()
+
 }
 
 // lexQuote scans until the end of a quote
@@ -254,7 +250,7 @@ Loop:
 func lexIdentifier(l *lexer) stateFn {
 	for {
 		switch r := l.next(); {
-		case isAlphaNumeric(r):
+		case isIdentifierChar(r):
 			// absorb.
 		default:
 			l.backup()
@@ -298,8 +294,8 @@ func isEndOfLine(r rune) bool {
 	return r == '\r' || r == '\n'
 }
 
-// isAlphaNumeric reports whether r is an alphabetic, digit, or underscore.
-func isAlphaNumeric(r rune) bool {
+// isIdentifierChar reports whether r is an alphabetic, digit, underscore, star, period or dash.
+func isIdentifierChar(r rune) bool {
 	return r == '*' || r == '_' || r == '-' || r == '.' || r == '/' || unicode.IsLetter(r) ||
 		unicode.IsDigit(r)
 }

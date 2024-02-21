@@ -115,7 +115,7 @@ func TestParseCueFiles(t *testing.T) {
 func parse_helper(tb testing.TB, input string) *tree.Tree {
 	tb.Helper()
 
-	parse := NewParser(input)
+	parse := newParser(input)
 	tree, err := parse.Start()
 	if err != nil {
 		tb.Fatal(err)

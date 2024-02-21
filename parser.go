@@ -6,31 +6,35 @@ package cuesheet
 
 import (
 	"fmt"
+
 	"github.com/narslan/tree"
 )
 
-// Parser
-type Parser struct {
+// parser
+type parser struct {
 	lexer     *lexer
 	tree      *tree.Tree
 	token     [3]item // three-token lookahead for parser.
 	peekCount int
 }
+type Command interface {
+	String() string
+}
 type node struct {
-	Type  string
-	Value string
+	Type  item
+	Value Command
 }
 
 func (n node) String() string {
-	return fmt.Sprintf("%s %s", n.Type, n.Value)
+	return fmt.Sprintf("%v %s", n.Type, n.Value)
 }
-func NewParser(input string) *Parser {
+func newParser(input string) *parser {
 	l := lex(input)
-	p := &Parser{lexer: l}
+	p := &parser{lexer: l}
 	return p
 }
 
-func (p *Parser) Start() (*tree.Tree, error) {
+func (p *parser) Start() (*tree.Tree, error) {
 
 	tree := tree.New("root")
 	p.tree = tree
@@ -45,7 +49,7 @@ func (p *Parser) Start() (*tree.Tree, error) {
 			if err != nil {
 				return nil, err
 			}
-			n := node{Type: item.String(), Value: s.Value}
+			n := node{Type: item, Value: s}
 			p.tree.AddTree(n)
 
 		case itemTitle:
@@ -53,21 +57,21 @@ func (p *Parser) Start() (*tree.Tree, error) {
 			if err != nil {
 				return nil, err
 			}
-			n := node{Type: item.String(), Value: s.Value}
+			n := node{Type: item, Value: s}
 			p.tree.AddTree(n)
 		case itemIndex:
 			s, err := p.matchIndex()
 			if err != nil {
 				return nil, err
 			}
-			n := node{Type: item.String(), Value: s.Value}
+			n := node{Type: item, Value: s}
 			p.tree.AddTree(n)
 		case itemFile:
 			s, err := p.matchFile()
 			if err != nil {
 				return nil, err
 			}
-			n := node{Type: item.String(), Value: s.Value}
+			n := node{Type: item, Value: s}
 			ft := p.tree.AddTree(n)
 
 			err = p.matchTrack(ft)
@@ -83,7 +87,7 @@ func (p *Parser) Start() (*tree.Tree, error) {
 	}
 	return tree, nil
 }
-func (p *Parser) next() item {
+func (p *parser) next() item {
 	if p.peekCount > 0 {
 		p.peekCount--
 	} else {
@@ -92,7 +96,7 @@ func (p *Parser) next() item {
 	return p.token[p.peekCount]
 }
 
-func (p *Parser) nextNonSpace() (token item) {
+func (p *parser) nextNonSpace() (token item) {
 	for {
 		token = p.next()
 		if (token.typ != itemSpace) && (token.typ != itemNewline) {
@@ -103,6 +107,6 @@ func (p *Parser) nextNonSpace() (token item) {
 }
 
 // backup backs the input stream up one token.
-func (p *Parser) backup() {
+func (p *parser) backup() {
 	p.peekCount++
 }
