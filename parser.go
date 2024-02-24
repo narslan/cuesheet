@@ -11,13 +11,13 @@ import (
 )
 
 type Index struct {
-	Minutes int
-	Seconds int
-	Frames  int
+	Minutes uint32
+	Seconds uint32
+	Frames  uint32
 }
 
 type Track struct {
-	ID      int
+	ID      uint32
 	Indices []*Index
 }
 

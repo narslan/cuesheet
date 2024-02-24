@@ -16,12 +16,16 @@ func (c trackCmd) String() string {
 	return fmt.Sprintf("%s %s", c.ID, c.Format)
 }
 
-func StrToInt(s string) (int, error) {
+func StrToInt(s string) (uint32, error) {
 
 	if s[0] == '0' {
 		s = s[1:]
 	}
-	return strconv.Atoi(s)
+	res, err := strconv.Atoi(s)
+	if err != nil {
+		return 0, err
+	}
+	return uint32(res), nil
 }
 
 func ParseTimeIndex(m, s, f string) (id Index, err error) {
