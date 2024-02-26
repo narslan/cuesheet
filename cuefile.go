@@ -9,7 +9,7 @@ type Cuefile struct {
 	files []*File
 }
 
-func NewCueFile(input string) (*Cuefile, error) {
+func New(input string) (*Cuefile, error) {
 
 	parse := newParser(input)
 	tree, f, err := parse.Start()

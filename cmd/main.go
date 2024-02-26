@@ -40,7 +40,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	c, err := cuesheet.NewCueFile(string(source))
+	c, err := cuesheet.New(string(source))
 
 	if err != nil {
 		log.Fatal(err)
