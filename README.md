@@ -1,6 +1,6 @@
 #cuesheet
 
-`cuesheet` is a go library, that builds a (parse) tree out of a cue file. 
+`cuesheet` is a go library for extracting information from cue file. 
 
 ### Usage
 ```go

@@ -33,6 +33,7 @@ type parser struct {
 	token     [3]item // three-token lookahead for parser.
 	peekCount int
 }
+
 type Command interface {
 	String() string
 }
