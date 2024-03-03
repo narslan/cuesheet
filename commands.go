@@ -79,7 +79,7 @@ type indexCmd struct {
 }
 
 func (c indexCmd) String() string {
-	return fmt.Sprintf("%s %s %s %s", c.ID, c.Min, c.Sec, c.Frames)
+	return fmt.Sprintf("%s %s:%s:%s", c.ID, c.Min, c.Sec, c.Frames)
 }
 
 // matchIndex captures the arguments of INDEX command.
